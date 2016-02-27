@@ -16,11 +16,8 @@ def home(request):
 
 
 #api/v1/product
-def product(request, class_id, info_id):
-		resp_json = {}
-		#req = urllib.request.Request('CoursePlaceholder.url', class_id = class_id)
-		resp_json["course"] = urllib.request.urlopen(req)
-		#req = urllib.request.Request('infoPlaceholder.url', info_id = info_id)
-		#resp_json["info"] = urllib.request.urlopen(req)
-		print(resp_json)
-		return JsonResponse(resp_json)
+def product(request, course_pk = ' '):
+		req = urllib.request.Request('http://models-api:8000/api/v1/courses/'+course_pk)
+		resp_json = urllib.request.urlopen(req).read().decode('utf-8')
+		resp = json.loads(resp_json)
+		return JsonResponse(resp, safe=False)
