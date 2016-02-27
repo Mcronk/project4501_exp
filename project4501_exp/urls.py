@@ -3,13 +3,13 @@ from django.contrib import admin
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^homepageCourse/$',views.homeCourse),
-    url(r'^homepageCourse/(?P<class_id>[0-9]+)/(?P<info_id>[0-9]+)/$', views.homeCourse),
+    url(r'^home/$',views.home),
+    #url(r'^home/(?P<class_id>[0-9]+)/(?P<info_id>[0-9]+)/$', views.home),
 
-    url(r'^product/$',views.productCourse),
-    url(r'^productPageCourse/(?P<class_id>[0-9]+)/(?P<info_id>[0-9]+)/$', views.productCourse),
+    url(r'^product/$',views.product),
+    #url(r'^product/(?P<class_id>[0-9]+)/(?P<info_id>[0-9]+)/$', views.product),
 
-    url(r'^admin/', include(admin.site.urls)),
+#    url(r'^admin/', include(admin.site.urls)),
 )
 
 
