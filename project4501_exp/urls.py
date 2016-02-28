@@ -5,9 +5,9 @@ from . import views
 urlpatterns = patterns('',
 
     url(r'^home/$',views.home),
-
-    url(r'^product/$',views.product),
-    url(r'^product/(?P<course_pk>[0-9]+)/$', views.product),
+    url(r'^courses/$',views.courses),
+    url(r'^course/$',views.course),
+    url(r'^course/(?P<course_pk>[0-9]+)/$', views.course),
 
 )
 
