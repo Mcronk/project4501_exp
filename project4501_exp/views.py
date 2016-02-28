@@ -19,23 +19,20 @@ def product(request, course_pk = ' '):
 		#req = urllib.request.Request('http://models-api:8000/api/v1/courses/'+course_pk)
 		course_req = requests.get('http://models-api:8000/api/v1/courses/'+course_pk)
 		
+		#retrieve tutor primary key
 		tutor_pk = course_req.headers.get('tutor')
 
+		#use tutor pk to find associated courses
 		tutor_req = requests.get('http://models-api:8000/api/v1/courses/'+ tutor_pk)
 		
+		#deserialize
 		course = json.loads(course.txt)
 		tutor = json.loads(tutor_req.txt)
 
+		#aggregate into single JSON object
 		data = { 'course' : course, 'tutor' : tutor }
 
-		#deserialize
-		courses = 
 
 		return JsonResponse(data, safe=False)
-
-		#request course via pk
-		#recieve pk and all course stuff.
-		# parse out tutor PK and then get tutor
-		# throw into one json object and return.  
 
 
