@@ -46,4 +46,14 @@ def course(request, course_pk = ''):
 		tutor_description = fields['description']
 	return JsonResponse({'course_name':course_name, 'course_price':course_price, 'course_description':course_description,'tutor_name':tutor_name, 'tutor_description':tutor_description}, safe=False)
 
-
+#User: Create and return token
+def createAuth(request, username = '', password = ''):
+	auth_req = requests.get('http://models-api:8000/api/v1/createAuth/'+ username + '/' + password)
+	token_data = json.loads(auth.text)#should return the auth Token to be put in cookies.
+	return JsonResponse({'token_data': token_data}, safe=False)
+	
+#User:  Check user token and return true or false
+def checkAuth(request, token = ''):
+	auth_req = requests.get('http://models-api:8000/api/v1/checkAuth/' + str(token))
+	auth_resp = json.loads(auth_resp.text)#should basically return true or false.
+	return JsonResponse({'auth_resp': auth_resp}, safe=False)
