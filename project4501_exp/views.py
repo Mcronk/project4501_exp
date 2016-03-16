@@ -61,13 +61,15 @@ def create_account(request, username = '', password = ''):
 @csrf_exempt
 def login(request):
 	if request.method == 'POST':
-		info = request.POST.get('data')
-		login_req = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = json.dumps(info))
+		data = request.POST
+		if not data:
+			return JsonResponse({'fail': "no POST data received"}, safe=False)
+		response = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = data)
 		#login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
-		login_data = json.loads(login_req.text)
-		return JsonResponse({'result': login_data}, safe=False)
+		response_data = json.loads(response.text)
+		return JsonResponse({'result': response_data}, safe=False)
 		return JsonResponse({'login_resp': login_req}, safe=False)
-	return JsonResponse({'msg': "use POST"}, safe=False)
+	return JsonResponse({'fail': "use POST"}, safe=False)
 
 #User:  logout user with token and returnf true or false
 def logout(request, token = ''):
