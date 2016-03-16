@@ -32,6 +32,11 @@ def courses(request):
 def course(request, course_pk = ''):
 	course_req = requests.get('http://models-api:8000/api/v1/course/'+course_pk)	
 	course_data = json.loads(course_req.text)
+	return JsonResponse({'result': course_data['work']})
+	req = json.loads(course_req)
+	return JsonResponse({'result': req})
+
+	course_data = json.loads(course_req.text)
 	for d in course_data:
 		fields = d['fields']
 		course_name = fields['name']
