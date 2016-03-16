@@ -3,7 +3,7 @@ import urllib.parse
 import requests
 import json
 from django.http import HttpResponse, JsonResponse
-
+from django.views.decorators.csrf import csrf_exempt
 
 #Course + Tutor: get information of a list of courses
 def courses(request):
@@ -58,10 +58,16 @@ def create_account(request, username = '', password = ''):
 	return JsonResponse({'token_data': token_data}, safe=False)
 
 #User:  login user with token and return true or false
-def login(request, token = ''):
-	login_req = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = requests.POST.get('data'))
-	#login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
-	return JsonResponse({'login_resp': login_req}, safe=False)
+@csrf_exempt
+def login(request):
+	if request.method == 'POST':
+		info = request.POST.get('data')
+		login_req = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = json.dumps(info))
+		#login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
+		login_data = json.loads(login_req.text)
+		return JsonResponse({'result': login_data}, safe=False)
+		return JsonResponse({'login_resp': login_req}, safe=False)
+	return JsonResponse({'msg': "use POST"}, safe=False)
 
 #User:  logout user with token and returnf true or false
 def logout(request, token = ''):
@@ -71,13 +77,14 @@ def logout(request, token = ''):
 
 #User + Listing:  Check if user is logged in with token.  If true, post listing with token and listing text.
 def create_listing(request, token = ''):
-	checkAuth = requests.post('http://models-api:8000/api/v1/authenticator/login' + str(token))
-	checkAuth_resp = json.loads(checkAuth_resp.text)#should return true if logged in and listing posed successfully.
-		if (checkAuth_resp['status'] == 'sucess') 
-				create_listing = requests.post('http://models-api:8000/api/v1/course/', info = info)
-				listing_resp = json.loads(listing_resp.text)#should return true if logged in and listing posed successfully.
-				return JsonResponse({'listing_resp': listing_resp}, safe=False)
-		else:
-			return JsonResponse({'listing_resp': "error"}, safe=False)
+	return None
+	# checkAuth = requests.post('http://models-api:8000/api/v1/authenticator/login' + str(token))
+	# checkAuth_resp = json.loads(checkAuth_resp.text)#should return true if logged in and listing posed successfully.
+	# if (checkAuth_resp['status'] == 'sucess') 
+	# 	create_listing = requests.post('http://models-api:8000/api/v1/course/', info = info)
+	# 	listing_resp = json.loads(listing_resp.text)#should return true if logged in and listing posed successfully.
+	# 	return JsonResponse({'listing_resp': listing_resp}, safe=False)
+	# else:
+	# 	return JsonResponse({'listing_resp': "error"}, safe=False)
 
 #name password email phone description.

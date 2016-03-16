@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = patterns('',
     url(r'^v1/create_account/(?P<username>)/(?P<password>)/$',views.create_account),
-    url(r'^v1/login/(?P<token>)/$',views.login),
+    url(r'^v1/login/$', views.login),
     url(r'^v1/logout/(?P<token>)/$',views.logout),
     url(r'^v1/create_listing/(?P<token>)/(?P<listing>)/$',views.create_listing),
 
