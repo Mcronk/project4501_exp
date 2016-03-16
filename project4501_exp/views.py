@@ -53,33 +53,31 @@ def course(request, course_pk = ''):
 
 #User: Create and return token
 def create_account(request, username = '', password = ''):
-	auth_req = requests.get('http://models-api:8000/api/v1/create_account/'+ username + '/' + password)
+	auth_req = requests.post('http://models-api:8000/api/v1/create_account/'+ username + '/' + password)
 	token_data = json.loads(token_data.text)#should return the auth Token to be put in cookies.
 	return JsonResponse({'token_data': token_data}, safe=False)
 
 #User:  login user with token and return true or false
 def login(request, token = ''):
-	login_req = requests.get('http://models-api:8000/api/v1/login/' + str(token))
-	login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
-	return JsonResponse({'login_resp': login_resp}, safe=False)
+	login_req = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = requests.POST.get('data'))
+	#login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
+	return JsonResponse({'login_resp': login_req}, safe=False)
 
-#User:  logout user with token and return true or false
+#User:  logout user with token and returnf true or false
 def logout(request, token = ''):
-	logout_req = requests.get('http://models-api:8000/api/v1/logout/' + str(token))
+	logout_req = requests.get('http://models-api:8000/api/v1/authenticator/logout/' + str(token))
 	logout_resp = json.loads(logout_resp.text)#should return true if login successful or throw an error
 	return JsonResponse({'logout_resp': logout_resp}, safe=False)
 
 #User + Listing:  Check if user is logged in with token.  If true, post listing with token and listing text.
-def create_listing(request, token = '', listing = ''):
-	checkAuth = requests.get('http://models-api:8000/api/v1/checkAuth/' + str(token))
+def create_listing(request, token = ''):
+	checkAuth = requests.post('http://models-api:8000/api/v1/authenticator/login' + str(token))
 	checkAuth_resp = json.loads(checkAuth_resp.text)#should return true if logged in and listing posed successfully.
-	for x in checkAuth_resp:
-		fields = x['fields']
-		auth = fields['loggedin'] #
-		if (auth == "true"):
-			create_listing = requests.get('http://models-api:8000/api/v1/create_listing/' + str(token) + '/' + listing)
-			listing_resp = json.loads(listing_resp.text)#should return true if logged in and listing posed successfully.
-			return JsonResponse({'listing_resp': listing_resp}, safe=False)
+		if (checkAuth_resp['status'] == 'sucess') 
+				create_listing = requests.post('http://models-api:8000/api/v1/course/', info = info)
+				listing_resp = json.loads(listing_resp.text)#should return true if logged in and listing posed successfully.
+				return JsonResponse({'listing_resp': listing_resp}, safe=False)
 		else:
 			return JsonResponse({'listing_resp': "error"}, safe=False)
 
+#name password email phone description.
