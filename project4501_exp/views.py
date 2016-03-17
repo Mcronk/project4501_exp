@@ -52,10 +52,19 @@ def course(request, course_pk = ''):
 	return JsonResponse({'course_name':course_name, 'course_price':course_price, 'course_description':course_description,'tutor_name':tutor_name, 'tutor_description':tutor_description}, safe=False)
 
 #User: Create and return token
-def create_account(request, username = '', password = ''):
+@csrf_exempt
+def create_account(request):
 	auth_req = requests.post('http://models-api:8000/api/v1/create_account/'+ username + '/' + password)
 	token_data = json.loads(token_data.text)#should return the auth Token to be put in cookies.
 	return JsonResponse({'token_data': token_data}, safe=False)
+	if request.method == 'POST':
+		data = request.POST
+		if not data:
+    		return _error_response(request, "Failed.  No data received")
+		response = requests.post('http://models-api:8000/api/v1/user/', data = data)
+		response_data = json.loads(response.text)
+		return JsonResponse({'result': response_data}, safe=False)
+    return _error_response(request, "Failed.  Use post")
 
 #User:  login user with token and return true or false
 @csrf_exempt
@@ -68,25 +77,40 @@ def login(request):
 		#login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
 		response_data = json.loads(response.text)
 		return JsonResponse({'result': response_data}, safe=False)
-		return JsonResponse({'login_resp': login_req}, safe=False)
-	return JsonResponse({'fail': "use POST"}, safe=False)
+		#return JsonResponse({'login_resp': login_req}, safe=False)
+    return _error_response(request, "Failed.  Use post")
 
-#User:  logout user with token and returnf true or false
-def logout(request, token = ''):
-	logout_req = requests.get('http://models-api:8000/api/v1/authenticator/logout/' + str(token))
-	logout_resp = json.loads(logout_resp.text)#should return true if login successful or throw an error
-	return JsonResponse({'logout_resp': logout_resp}, safe=False)
+#User:  logout user with token and return true or false
+def logout(request):
+	if request.method == 'POST':
+		data = request.POST
+		if not data:
+			return JsonResponse({'fail': "no POST data received"}, safe=False)
+		response = requests.post('http://models-api:8000/api/v1/authenticator/logout/', data = data)
+		response_data = json.loads(response.text)
+		return JsonResponse({'result': response_data}, safe=False)
+    return _error_response(request, "Failed.  Use post")
 
-#User + Listing:  Check if user is logged in with token.  If true, post listing with token and listing text.
-def create_listing(request, token = ''):
-	return None
-	# checkAuth = requests.post('http://models-api:8000/api/v1/authenticator/login' + str(token))
-	# checkAuth_resp = json.loads(checkAuth_resp.text)#should return true if logged in and listing posed successfully.
-	# if (checkAuth_resp['status'] == 'sucess') 
-	# 	create_listing = requests.post('http://models-api:8000/api/v1/course/', info = info)
-	# 	listing_resp = json.loads(listing_resp.text)#should return true if logged in and listing posed successfully.
-	# 	return JsonResponse({'listing_resp': listing_resp}, safe=False)
-	# else:
-	# 	return JsonResponse({'listing_resp': "error"}, safe=False)
 
-#name password email phone description.
+#User + course:  Check if user is logged in with token.  If true, post listing with token and listing text.
+def create_listing(request):
+	#check if user is authenticated correctly
+	
+	if request.method == 'POST':
+		data = request.POST
+		if not data:
+			return JsonResponse({'fail': "no POST data received"}, safe=False)
+		response = requests.post('http://models-api:8000/api/v1/course/', data = data)
+		response_data = json.loads(response.text)
+		return JsonResponse({'result': response_data}, safe=False)
+    return _error_response(request, "Failed.  Use post")
+	
+
+def _error_response(request, error_msg):
+    return JsonResponse({'work': False, 'msg': error_msg}, safe=False)
+
+def _success_response(request, resp=None):
+    if resp:
+        return JsonResponse({'work': True, 'resp': resp}, safe=False)
+    else:
+        return JsonResponse({'work': True})

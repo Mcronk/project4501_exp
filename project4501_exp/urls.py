@@ -3,10 +3,10 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = patterns('',
-    url(r'^v1/create_account/(?P<username>)/(?P<password>)/$',views.create_account),
+    url(r'^v1/create_account/$', views.create_account),
     url(r'^v1/login/$', views.login),
-    url(r'^v1/logout/(?P<token>)/$',views.logout),
-    url(r'^v1/create_listing/(?P<token>)/(?P<listing>)/$',views.create_listing),
+    url(r'^v1/logout/$', views.logout),
+    url(r'^v1/create_listing/$',views.create_listing),
 
     url(r'^v1/courses/$',views.courses),
     url(r'^v1/course/$',views.course),
