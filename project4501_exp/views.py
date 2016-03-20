@@ -54,9 +54,10 @@ def course(request, course_pk = ''):
 #User: Create and return token
 @csrf_exempt
 def create_account(request):
-	auth_req = requests.post('http://models-api:8000/api/v1/create_account/'+ username + '/' + password)
-	token_data = json.loads(token_data.text)#should return the auth Token to be put in cookies.
-	return JsonResponse({'token_data': token_data}, safe=False)
+	# data = request.POST
+	# auth_req = requests.post('http://models-api:8000/api/v1/user/')
+	# token_data = json.loads(token_data.text)#should return the auth Token to be put in cookies.
+	# return JsonResponse({'token_data': token_data}, safe=False)
 	if request.method == 'POST':
 		data = request.POST
 		if not data:
