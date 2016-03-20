@@ -89,18 +89,22 @@ def login(request):
 	return _error_response(request, "Failed. Use post")
 
 #User:  logout user with token and return true or false
+@csrf_exempt
 def logout(request):
 	if request.method == 'POST':
 		data = request.POST
 		if not data:
 			return JsonResponse({'fail': "no POST data received"}, safe=False)
 		response = requests.post('http://models-api:8000/api/v1/authenticator/logout/', data = data)
-		response_data = json.loads(response.text)
-		return JsonResponse({'result': response_data}, safe=False)
-	return _error_response(request, "Failed.  Use post")
+		resp_data = json.loads(response.text)
+		if not resp_data or not resp_data['work']:
+			return _error_response(request, resp_data['msg'])
+		return _success_response(request)
+	return _error_response(request, "Failed. Use post")
 
 
 #User + course:  Check if user is logged in with token.  If true, post listing with token and listing text.
+@csrf_exempt
 def create_listing(request):
 	#check if user is authenticated correctly
 	
