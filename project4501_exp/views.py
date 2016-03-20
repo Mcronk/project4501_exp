@@ -61,11 +61,15 @@ def create_account(request):
 	if request.method == 'POST':
 		data = request.POST
 		if not data:
-    		return _error_response(request, "Failed.  No data received")
+			return _error_response(request, "Failed.  No data received")
+		# try:
+		# 	data['grade'] = 0
+		# except:
+		# 	return _error_response(request, "Failed!")
 		response = requests.post('http://models-api:8000/api/v1/user/', data = data)
 		response_data = json.loads(response.text)
 		return JsonResponse({'result': response_data}, safe=False)
-    return _error_response(request, "Failed.  Use post")
+	return _error_response(request, "Failed. Use post")
 
 #User:  login user with token and return true or false
 @csrf_exempt
@@ -76,10 +80,13 @@ def login(request):
 			return JsonResponse({'fail': "no POST data received"}, safe=False)
 		response = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = data)
 		#login_resp = json.loads(login_resp.text)#should return true if login successful or throw an error
-		response_data = json.loads(response.text)
-		return JsonResponse({'result': response_data}, safe=False)
+		resp_data = json.loads(response.text)
+		if not resp_data or not resp_data['work']:
+		  	# couldn't log them in, send them back to login page with error
+			return _error_response(request, resp_data['msg'])
+		return _success_response(request, {'authenticator': resp_data['resp']['authenticator']})
 		#return JsonResponse({'login_resp': login_req}, safe=False)
-    return _error_response(request, "Failed.  Use post")
+	return _error_response(request, "Failed. Use post")
 
 #User:  logout user with token and return true or false
 def logout(request):
@@ -90,7 +97,7 @@ def logout(request):
 		response = requests.post('http://models-api:8000/api/v1/authenticator/logout/', data = data)
 		response_data = json.loads(response.text)
 		return JsonResponse({'result': response_data}, safe=False)
-    return _error_response(request, "Failed.  Use post")
+	return _error_response(request, "Failed.  Use post")
 
 
 #User + course:  Check if user is logged in with token.  If true, post listing with token and listing text.
@@ -104,14 +111,14 @@ def create_listing(request):
 		response = requests.post('http://models-api:8000/api/v1/course/', data = data)
 		response_data = json.loads(response.text)
 		return JsonResponse({'result': response_data}, safe=False)
-    return _error_response(request, "Failed.  Use post")
+	return _error_response(request, "Failed.  Use post")
 	
 
 def _error_response(request, error_msg):
-    return JsonResponse({'work': False, 'msg': error_msg}, safe=False)
+	return JsonResponse({'work': False, 'msg': error_msg}, safe=False)
 
 def _success_response(request, resp=None):
-    if resp:
-        return JsonResponse({'work': True, 'resp': resp}, safe=False)
-    else:
-        return JsonResponse({'work': True})
+	if resp:
+		return JsonResponse({'work': True, 'resp': resp}, safe=False)
+	else:
+		return JsonResponse({'work': True})
