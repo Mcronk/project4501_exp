@@ -25,7 +25,6 @@ def courses(request):
 	#return a list dictionary (each dictionary is a course)
 	return JsonResponse(courses_list, safe=False)
 	
-
 #Course + Tutor: get information of a course
 def course(request, course_pk = ''):
 	course_req = requests.get('http://models-api:8000/api/v1/course/'+course_pk)	
@@ -83,7 +82,7 @@ def logout(request):
 	if request.method == 'POST':
 		data = request.POST
 		if not data:
-			return JsonResponse({'fail': "no POST data received"}, safe=False)
+			return _error_response(request, "no POST data received")
 		response = requests.post('http://models-api:8000/api/v1/authenticator/logout/', data = data)
 		resp_data = json.loads(response.text)
 		if not resp_data or not resp_data['work']:
