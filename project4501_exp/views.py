@@ -32,6 +32,11 @@ def courses(request):
 def course(request, course_pk = ''):
 	course_req = requests.get('http://models-api:8000/api/v1/course/'+course_pk)	
 	course_data = json.loads(course_req.text)
+	course = course_data['resp']
+	
+	
+	return _success_response(request, course_data['resp'])
+
 	return JsonResponse({'result': course_data['work']})
 	req = json.loads(course_req)
 	return JsonResponse({'result': req})
@@ -105,39 +110,40 @@ def logout(request):
 
 #User + course:  Check if user is logged in with token.  If true, post listing with token and listing text.
 @csrf_exempt
-def create_listing(request):
+def create_course(request):
 	#receive authenticator
 	#send authenticator
-	#get username or false back
-	#package username with  
-	#give back response I will ge the UserID
-
+	#get user_pk or false back
+	#package user_pk with course 
+	#give back response I will get the UserID
 
 	if request.method == 'POST':
-		data = request.POST
+		post_data = request.POST
+		data = dict(post_data.dict())
 		if not data:
-			return JsonResponse({'fail': "no POST data received"}, safe=False)
+			return _error_response("no POST data received")
 		#get authenticator
-		authenticator = request.POST.get['auth']
-
+		authenticator = data['authenticator']
+		data_auth={'authenticator':authenticator}
 		#send authenticator
-		response = requests.post('http://models-api:8000/api/v1/checkAuth/', authenticator = authenticator)
-		resp_data = json.loads(response.text)
-		#get username
-		username = resp_data['username']
-		if not resp_data or not resp_data['work']:
-			return _error_response(request, "auth response data incorrect")
-		#if username == false
-		if (username == "false")
-			return _error_response(request, "Failed. Authenticator does not match username")
-		listing = request.POST
-		listing['username'] = username
-		listing_resp = requests.post('http://models-api:8000/api/v1/checkAuth/', listing = listing)
+		response = requests.post('http://models-api:8000/api/v1/authenticator/check/', data = data_auth)
 		resp_data = json.loads(response.text)
 		if not resp_data or not resp_data['work']:
-			return _error_response(request, "listing response data incorrect")
-		return JsonResponse({'result': resp_data}, safe=False)
-	return _error_response(request, "Failed.  Use post")
+			return _error_response(request, resp_data['msg'])
+		#get user_pk
+		tutor_pk = resp_data['resp']['tutor']
+		# if (username == "false")
+		# 	return _error_response(request, "Failed. Authenticator does not match username")
+		# listing = request.POST
+		del data['authenticator']
+		data['tutor'] = tutor_pk
+		data['popularity'] = 0
+		course_resp = requests.post('http://models-api:8000/api/v1/course/', data = data)
+		resp_data = json.loads(course_resp.text)
+		if not resp_data or not resp_data['work']:
+			return _error_response(request, resp_data['msg'])
+		return _success_response(request, {'course_pk': resp_data['resp']['course_pk']})
+	return _error_response(request, "Failed. Use post")
 	
 
 def _error_response(request, error_msg):
