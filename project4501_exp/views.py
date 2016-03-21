@@ -106,15 +106,37 @@ def logout(request):
 #User + course:  Check if user is logged in with token.  If true, post listing with token and listing text.
 @csrf_exempt
 def create_listing(request):
-	#check if user is authenticated correctly
-	
+	#receive authenticator
+	#send authenticator
+	#get username or false back
+	#package username with  
+	#give back response I will ge the UserID
+
+
 	if request.method == 'POST':
 		data = request.POST
 		if not data:
 			return JsonResponse({'fail': "no POST data received"}, safe=False)
-		response = requests.post('http://models-api:8000/api/v1/course/', data = data)
-		response_data = json.loads(response.text)
-		return JsonResponse({'result': response_data}, safe=False)
+		#get authenticator
+		authenticator = request.POST.get['auth']
+
+		#send authenticator
+		response = requests.post('http://models-api:8000/api/v1/checkAuth/', authenticator = authenticator)
+		resp_data = json.loads(response.text)
+		#get username
+		username = resp_data['username']
+		if not resp_data or not resp_data['work']:
+			return _error_response(request, "auth response data incorrect")
+		#if username == false
+		if (username == "false")
+			return _error_response(request, "Failed. Authenticator does not match username")
+		listing = request.POST
+		listing['username'] = username
+		listing_resp = requests.post('http://models-api:8000/api/v1/checkAuth/', listing = listing)
+		resp_data = json.loads(response.text)
+		if not resp_data or not resp_data['work']:
+			return _error_response(request, "listing response data incorrect")
+		return JsonResponse({'result': resp_data}, safe=False)
 	return _error_response(request, "Failed.  Use post")
 	
 
