@@ -17,12 +17,10 @@ def courses(request):
 		course['course_name'] = fields['name']
 		course['course_description'] = fields['description']
 		tutor_pk = fields['tutor']
-
 		user_req = requests.get('http://models-api:8000/api/v1/user/'+str(tutor_pk))
 		user_data = json.loads(user_req.text)
-		for d in user_data:
-			fields = d['fields']
-			course['course_tutor'] = fields['name']
+		user = user_data['resp']
+		course['course_tutor'] = user['name']
 		courses_list.append(course)
 	#return a list dictionary (each dictionary is a course)
 	return JsonResponse(courses_list, safe=False)
@@ -33,28 +31,12 @@ def course(request, course_pk = ''):
 	course_req = requests.get('http://models-api:8000/api/v1/course/'+course_pk)	
 	course_data = json.loads(course_req.text)
 	course = course_data['resp']
-	
-	
-	return _success_response(request, course_data['resp'])
-
-	return JsonResponse({'result': course_data['work']})
-	req = json.loads(course_req)
-	return JsonResponse({'result': req})
-
-	course_data = json.loads(course_req.text)
-	for d in course_data:
-		fields = d['fields']
-		course_name = fields['name']
-		course_price = fields['price']
-		course_description = fields['description']
-		tutor_pk = fields['tutor']
+	tutor_pk = course['tutor']
 	user_req = requests.get('http://models-api:8000/api/v1/user/'+str(tutor_pk))
 	user_data = json.loads(user_req.text)
-	for d in user_data:
-		fields = d['fields']
-		tutor_name = fields['name']
-		tutor_description = fields['description']
-	return JsonResponse({'course_name':course_name, 'course_price':course_price, 'course_description':course_description,'tutor_name':tutor_name, 'tutor_description':tutor_description}, safe=False)
+	user = user_data['resp']
+	data = {'course_name':course['name'], 'course_price':course['price'], 'course_description':course['description'],'tutor_name':user['name'], 'tutor_description':user['description']}
+	return _success_response(request, data)
 
 #User: Create and return token
 @csrf_exempt
@@ -72,8 +54,10 @@ def create_account(request):
 		# except:
 		# 	return _error_response(request, "Failed!")
 		response = requests.post('http://models-api:8000/api/v1/user/', data = data)
-		response_data = json.loads(response.text)
-		return JsonResponse({'result': response_data}, safe=False)
+		resp_data = json.loads(response.text)
+		if not resp_data or not resp_data['work']:
+			return _error_response(request, resp_data['msg'])
+		return _success_response(request, resp_data)
 	return _error_response(request, "Failed. Use post")
 
 #User:  login user with token and return true or false
