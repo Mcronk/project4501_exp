@@ -28,7 +28,7 @@ def search(request):
 		return JsonResponse(courses_list, safe=False)
 	else:
 		es = Elasticsearch(['es'])
-		result = es.search(index='listing_index', body={'query': {'query_string': {'query': 'app'}}, 'size': 10})
+		result = es.search(index='listing_index', body={'query': {'query_string': {'query': 'violin'}}, 'size': 10})
 		courses_data = result['hits']['hits']
 		courses_list = []
 		for c in courses_data:
@@ -36,6 +36,8 @@ def search(request):
 			course['name'] = c['_source']['name']
 			course['description'] = c['_source']['description']
 			courses_list.append(course)
+		return JsonResponse(result, safe=False)
+
 		return JsonResponse({'work': True, 'resp': courses_list}, safe=False)
 
 
@@ -63,7 +65,7 @@ def login(request):
 		response = requests.post('http://models-api:8000/api/v1/authenticator/login/', data = data)
 		resp_data = json.loads(response.text)
 		if not resp_data or not resp_data['work']:
-		  	# couldn't log them in, send them back to login page with error
+			# couldn't log them in, send them back to login page with error
 			return _error_response(request, resp_data['msg'])
 		return _success_response(request, {'authenticator': resp_data['resp']['authenticator']})
 		#return JsonResponse({'login_resp': login_req}, safe=False)
@@ -133,15 +135,15 @@ def courses(request):
 		course = {}
 		course['course_pk'] = d['pk']
 		fields = d['fields']
-		course['course_name'] = fields['name']
-		course['course_description'] = fields['description']
-		course['course_price'] = fields['price']
+		course['name'] = fields['name']
+		course['description'] = fields['description']
+		course['price'] = fields['price']
 		tutor_pk = fields['tutor']
 		user_req = requests.get('http://models-api:8000/api/v1/user/'+str(tutor_pk))
 		user_data = json.loads(user_req.text)
 		user = user_data['resp']
-		course['course_tutor'] = user['name']
-		course['course_tutor_description'] = user['description']
+		course['tutor'] = user['name']
+		course['tutor_description'] = user['description']
 		courses_list.append(course)
 	#return a list dictionary (each dictionary is a course)
 	return JsonResponse(courses_list, safe=False)
