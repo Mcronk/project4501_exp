@@ -5,6 +5,39 @@ from kafka import KafkaProducer
 import json
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from elasticsearch import Elasticsearch
+
+@csrf_exempt
+def search(request):
+	if request.method == 'POST':
+		data = request.POST
+		if not data:
+			return _error_response(request, "Failed.  No query received")
+		query = data['query']
+		es = Elasticsearch(['es'])
+		result = es.search(index='listing_index', body={'query': {'query_string': {'query': query}}})
+
+		courses_data = result['hits']['hits']
+		courses_list = []
+		for c in courses_data:
+			course = {}
+			course['name'] = c['_source']['name']
+			course['description'] = c['_source']['description']
+			courses_list.append(course)
+		#return a list dictionary (each dictionary is a course)
+		return JsonResponse(courses_list, safe=False)
+	else:
+		es = Elasticsearch(['es'])
+		result = es.search(index='listing_index', body={'query': {'query_string': {'query': 'app'}}, 'size': 10})
+		courses_data = result['hits']['hits']
+		courses_list = []
+		for c in courses_data:
+			course = {}
+			course['name'] = c['_source']['name']
+			course['description'] = c['_source']['description']
+			courses_list.append(course)
+		return JsonResponse({'work': True, 'resp': courses_list}, safe=False)
+
 
 #User: Create and return token
 @csrf_exempt
@@ -82,7 +115,7 @@ def create_course(request):
 		producer = KafkaProducer(bootstrap_servers='kafka:9092')
 		# some_new_listing = {'title': 'Used MacbookAir 13"', 'description': 'This is a used Macbook Air in great condition', 'id':42}
 		new_listing = data
-		producer.send('course-topic', json.dumps(new_listing).encode('utf-8'))
+		producer.send('new-course-topic', json.dumps(new_listing).encode('utf-8'))
 
 		course_resp = requests.post('http://models-api:8000/api/v1/course/', data = data)
 		resp_data = json.loads(course_resp.text)
