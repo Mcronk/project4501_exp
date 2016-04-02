@@ -1,6 +1,7 @@
 import urllib.request
 import urllib.parse
 import requests
+from kafka import KafkaProducer
 import json
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -77,6 +78,12 @@ def create_course(request):
 		del data['authenticator']
 		data['tutor'] = tutor_pk
 		data['popularity'] = 0
+
+		producer = KafkaProducer(bootstrap_servers='kafka:9092')
+		# some_new_listing = {'title': 'Used MacbookAir 13"', 'description': 'This is a used Macbook Air in great condition', 'id':42}
+		new_listing = data
+		producer.send('course-topic', json.dumps(new_listing).encode('utf-8'))
+
 		course_resp = requests.post('http://models-api:8000/api/v1/course/', data = data)
 		resp_data = json.loads(course_resp.text)
 		if not resp_data or not resp_data['work']:
