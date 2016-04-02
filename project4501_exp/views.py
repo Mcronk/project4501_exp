@@ -102,11 +102,13 @@ def courses(request):
 		fields = d['fields']
 		course['course_name'] = fields['name']
 		course['course_description'] = fields['description']
+		course['course_price'] = fields['price']
 		tutor_pk = fields['tutor']
 		user_req = requests.get('http://models-api:8000/api/v1/user/'+str(tutor_pk))
 		user_data = json.loads(user_req.text)
 		user = user_data['resp']
 		course['course_tutor'] = user['name']
+		course['course_tutor_description'] = user['description']
 		courses_list.append(course)
 	#return a list dictionary (each dictionary is a course)
 	return JsonResponse(courses_list, safe=False)
