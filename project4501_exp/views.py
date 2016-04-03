@@ -22,20 +22,20 @@ def search(request):
 		for c in courses_data:
 			course = {}
 			course['name'] = c['_source']['name']
-			course['course_pk'] = c['_source']['course_pk']
+			course['pk'] = c['_source']['pk']
 			course['description'] = c['_source']['description']
 			courses_list.append(course)
 		#return a list dictionary (each dictionary is a course)
 		return JsonResponse(courses_list, safe=False)
 	else:
 		es = Elasticsearch(['es'])
-		result = es.search(index='listing_index', body={'query': {'query_string': {'query': 'violin'}}, 'size': 10})
+		result = es.search(index='listing_index', body={'query': {'query_string': {'query': 'calculus'}}, 'size': 10})
 		courses_data = result['hits']['hits']
 		courses_list = []
 		for c in courses_data:
 			course = {}
 			course['name'] = c['_source']['name']
-			course['course_pk'] = c['_source']['course_pk']
+			course['pk'] = c['_source']['pk']
 			course['description'] = c['_source']['description']
 			courses_list.append(course)
 		return JsonResponse(result, safe=False)
@@ -115,17 +115,17 @@ def create_course(request):
 		del data['authenticator']
 		data['tutor'] = tutor_pk
 		data['popularity'] = 0
-
-		producer = KafkaProducer(bootstrap_servers='kafka:9092')
-		# some_new_listing = {'title': 'Used MacbookAir 13"', 'description': 'This is a used Macbook Air in great condition', 'id':42}
-		new_listing = data
-		producer.send('new-course-topic', json.dumps(new_listing).encode('utf-8'))
-
 		course_resp = requests.post('http://models-api:8000/api/v1/course/', data = data)
 		resp_data = json.loads(course_resp.text)
 		if not resp_data or not resp_data['work']:
 			return _error_response(request, resp_data['msg'])
-		return _success_response(request, {'course_pk': resp_data['resp']['course_pk']})
+
+		producer = KafkaProducer(bootstrap_servers='kafka:9092')
+		# some_new_listing = {'title': 'Used MacbookAir 13"', 'description': 'This is a used Macbook Air in great condition', 'id':42}
+		data['pk'] = resp_data['resp']['pk']
+		producer.send('new-course-topic', json.dumps(data).encode('utf-8'))
+
+		return _success_response(request, {'course_pk': resp_data['resp']['pk']})
 	return _error_response(request, "Failed. Use post")
 
 #Course + Tutor: get information of a list of courses
@@ -135,7 +135,7 @@ def courses(request):
 	courses_list = []
 	for d in course_data:
 		course = {}
-		course['course_pk'] = d['pk']
+		course['pk'] = d['pk']
 		fields = d['fields']
 		course['name'] = fields['name']
 		course['description'] = fields['description']
