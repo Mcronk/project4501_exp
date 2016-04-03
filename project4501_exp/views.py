@@ -161,7 +161,9 @@ def course(request, course_pk = ''):
 	user_req = requests.get('http://models-api:8000/api/v1/user/'+str(tutor_pk))
 	user_data = json.loads(user_req.text)
 	user = user_data['resp']
-	data = {'course_name':course['name'], 'course_price':course['price'], 'course_description':course['description'],'tutor_name':user['name'], 'tutor_description':user['description']}
+	data = {'course':course, 'user':user}
+
+	# data = {'course_name':course['name'], 'course_price':course['price'], 'course_description':course['description'],'tutor_name':user['name'], 'tutor_description':user['description']}
 	return _success_response(request, data)
 
 
