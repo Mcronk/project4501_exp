@@ -22,6 +22,7 @@ def search(request):
 		for c in courses_data:
 			course = {}
 			course['name'] = c['_source']['name']
+			course['course_pk'] = c['_source']['course_pk']
 			course['description'] = c['_source']['description']
 			courses_list.append(course)
 		#return a list dictionary (each dictionary is a course)
@@ -34,6 +35,7 @@ def search(request):
 		for c in courses_data:
 			course = {}
 			course['name'] = c['_source']['name']
+			course['course_pk'] = c['_source']['course_pk']
 			course['description'] = c['_source']['description']
 			courses_list.append(course)
 		return JsonResponse(result, safe=False)
